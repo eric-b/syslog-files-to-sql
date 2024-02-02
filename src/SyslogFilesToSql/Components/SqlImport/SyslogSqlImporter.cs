@@ -317,7 +317,7 @@ namespace SyslogFilesToSql.Components.SqlImport
                 }
 
                 using StreamReader syslogStream = file.OpenText();
-                IObservable<RawSyslogMessage> rawSyslogMessageProvider = GetProvider(syslogStream);
+                IObservable<RawSyslogMessage> rawSyslogMessageProvider = Helpers.Helpers.GetRawSyslogMessageProvider(syslogStream);
 
                 using (global::Npgsql.NpgsqlConnection cx = await _db.OpenConnection(cancellationToken))
                 {
@@ -360,16 +360,6 @@ namespace SyslogFilesToSql.Components.SqlImport
                 _logger.LogError(ex, $"Error while processing file: {file.Name}");
                 return ProcessResult.GenericFailure;
             }
-        }
-
-        static IObservable<RawSyslogMessage> GetProvider(TextReader stream)
-        {
-            return Observable.Using(
-                () => stream,
-                reader => Observable.FromAsync(reader.ReadLineAsync)
-                                    .Repeat()
-                                    .TakeWhile(line => line != null)
-                                    .Select(line => new RawSyslogMessage { Message = line }));
         }
 
         void IObserver<FileInfo>.OnCompleted()
