@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyslogFilesToSql", "SyslogFilesToSql\SyslogFilesToSql.csproj", "{81F19C0F-8CCE-43D1-B4A9-726E13FE6FA4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyslogFilesToSql.Npgsql.Migrations", "SyslogFilesToSql.Npgsql.Migrations\SyslogFilesToSql.Npgsql.Migrations.csproj", "{2BC13401-10A0-40A2-A4D3-B33A68043006}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyslogFilesToSql.Npgsql.Datalayer", "SyslogFilesToSql.Npgsql.Datalayer\SyslogFilesToSql.Npgsql.Datalayer.csproj", "{20FB6864-0284-4C5A-AA3F-EBD8DD0B10A2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_tests", "_tests", "{79F49A6F-D347-420E-BB12-9E83C1103D2B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyslogFilesToSql.Tests", "tests\SyslogFilesToSql.Tests\SyslogFilesToSql.Tests.csproj", "{E2936B18-EC25-453A-B632-9BBC5D7E3A7F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{81F19C0F-8CCE-43D1-B4A9-726E13FE6FA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81F19C0F-8CCE-43D1-B4A9-726E13FE6FA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81F19C0F-8CCE-43D1-B4A9-726E13FE6FA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81F19C0F-8CCE-43D1-B4A9-726E13FE6FA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BC13401-10A0-40A2-A4D3-B33A68043006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BC13401-10A0-40A2-A4D3-B33A68043006}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BC13401-10A0-40A2-A4D3-B33A68043006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BC13401-10A0-40A2-A4D3-B33A68043006}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20FB6864-0284-4C5A-AA3F-EBD8DD0B10A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20FB6864-0284-4C5A-AA3F-EBD8DD0B10A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20FB6864-0284-4C5A-AA3F-EBD8DD0B10A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20FB6864-0284-4C5A-AA3F-EBD8DD0B10A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2936B18-EC25-453A-B632-9BBC5D7E3A7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2936B18-EC25-453A-B632-9BBC5D7E3A7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2936B18-EC25-453A-B632-9BBC5D7E3A7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2936B18-EC25-453A-B632-9BBC5D7E3A7F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E2936B18-EC25-453A-B632-9BBC5D7E3A7F} = {79F49A6F-D347-420E-BB12-9E83C1103D2B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C33CE40E-CE6F-4938-8578-19C6BECD3037}
+	EndGlobalSection
+EndGlobal

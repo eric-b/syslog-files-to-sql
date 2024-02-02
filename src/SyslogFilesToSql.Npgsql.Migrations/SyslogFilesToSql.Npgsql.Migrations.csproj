@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\001\Procedures\complete_syslog_msg_import.sql" />
+    <None Remove="Resources\001\Procedures\_update_syslog_partitions.sql" />
+    <None Remove="Resources\001\Tables\syslog_app.sql" />
+    <None Remove="Resources\001\Tables\syslog_facility.sql" />
+    <None Remove="Resources\001\Tables\syslog_file_imported.sql" />
+    <None Remove="Resources\001\Tables\syslog_host.sql" />
+    <None Remove="Resources\001\Tables\syslog_msg.sql" />
+    <None Remove="Resources\001\Tables\syslog_msg_import.sql" />
+    <None Remove="Resources\001\Tables\syslog_msg_stat.sql" />
+    <None Remove="Resources\001\Tables\syslog_payload_type.sql" />
+    <None Remove="Resources\001\Tables\syslog_severity.sql" />
+    <None Remove="Resources\001\Views\v_syslog_msg.sql" />
+    <None Remove="Resources\001\Views\v_syslog_msg_stat.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\001\Procedures\complete_syslog_msg_import.sql" />
+    <EmbeddedResource Include="Resources\001\Functions\_update_syslog_partitions.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_app.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_msg_stat.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_payload_type.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_host.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_severity.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_file_imported.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_facility.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_msg.sql" />
+    <EmbeddedResource Include="Resources\001\Tables\syslog_msg_import.sql" />
+    <EmbeddedResource Include="Resources\001\Views\v_syslog_msg_stat.sql" />
+    <EmbeddedResource Include="Resources\001\Views\v_syslog_msg.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentMigrator" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+</Project>
