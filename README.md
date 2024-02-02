@@ -57,7 +57,7 @@ For the first run, you may need to set a high *Command Timeout* in the connectio
 
 ## Run in Kubernetes
 
-You can use this image (linux/amd64): https://hub.docker.com/r/eric1901/syslog-files-to-sql
+You can use this image (linux/amd64): [docker.io/eric1901/syslog-files-to-sql](https://hub.docker.com/r/eric1901/syslog-files-to-sql)
 
 Example of deployment manifest:
 
