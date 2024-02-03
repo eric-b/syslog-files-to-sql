@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing;
+﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SyslogFilesToSql.Components.SyslogFiles
 {
@@ -11,13 +14,17 @@ namespace SyslogFilesToSql.Components.SyslogFiles
     {
         private readonly SyslogFilesWatcherOptions _options;
 
-        private readonly FileSystemWatcher _fileWatcher;
+        private readonly PhysicalFileProvider _fileWatcher;
 
         private readonly ILogger _logger;
 
         private readonly HashSet<IObserver<FileInfo>> _observers;
 
         private readonly Matcher _globMatcher;
+
+        private readonly HashSet<string> _filesToIgnore;
+
+        private IDisposable? _unsubscribeFromChanges;
 
         public SyslogFilesWatcher(IOptions<SyslogFilesWatcherOptions> options, ILogger<SyslogFilesWatcher> logger)
         {
@@ -29,17 +36,12 @@ namespace SyslogFilesToSql.Components.SyslogFiles
             _options = options.Value;
             _options.Validate();
 
-            _fileWatcher = new FileSystemWatcher();
-            _fileWatcher.Path = _options.SyslogDirectory!;
-            _fileWatcher.NotifyFilter = NotifyFilters.FileName;
-            _fileWatcher.Filter = "*";
-            _fileWatcher.Changed += OnFileCreatedOrChanged;
-            _fileWatcher.Renamed += OnFileRenamed;
-            _fileWatcher.Created += OnFileCreatedOrChanged;
-            _fileWatcher.Error += OnFileWatcherError;
-            _fileWatcher.IncludeSubdirectories = false;
+            _fileWatcher = new PhysicalFileProvider(_options.SyslogDirectory!, Microsoft.Extensions.FileProviders.Physical.ExclusionFilters.Sensitive);
+            _fileWatcher.UsePollingFileWatcher = true; // because we expect to always watch a mounted volume in linux container.
+            _fileWatcher.UseActivePolling = true;
 
             _observers = new HashSet<IObserver<FileInfo>>(1);
+            _filesToIgnore = new HashSet<string>();
 
             // If compression after import is enable, we will append extension ".gz" to files.
             _globMatcher = new Matcher();
@@ -53,14 +55,19 @@ namespace SyslogFilesToSql.Components.SyslogFiles
         {
             _logger.LogInformation($"Watching syslog files in {_options.SyslogDirectory}...");
 
-            foreach (string filepath in _globMatcher.GetResultsInFullPath(_options.SyslogDirectory!))
-            {
-                CheckFile(new FileInfo(filepath), checkFileGlobPattern: false);
-            }
+            CheckDirectory();
 
-            _fileWatcher.EnableRaisingEvents = true;
+            _unsubscribeFromChanges = ChangeToken.OnChange(() => _fileWatcher.Watch(_options.SyslogFilePattern), CheckDirectory);
         }
 
+        private void CheckDirectory()
+        {
+            foreach (string filepath in _globMatcher.GetResultsInFullPath(_options.SyslogDirectory!))
+            {
+                CheckFile(new FileInfo(filepath));
+            }
+        }
+        
         private void OnFileWatcherError(object sender, ErrorEventArgs e)
         {
             Exception ex = e.GetException();
@@ -71,35 +78,29 @@ namespace SyslogFilesToSql.Components.SyslogFiles
             }
         }
 
-        private void CheckFile(FileInfo file, bool checkFileGlobPattern)
+        private void CheckFile(FileInfo file)
         {
-            if (checkFileGlobPattern)
-            {
-                PatternMatchingResult patternMatchResult = MatcherExtensions.Match(_globMatcher, _options.SyslogDirectory!, file.FullName);
-                if (!patternMatchResult.HasMatches)
-                {
-                    return;
-                }
-            }
-            
-            if (!EnsureCanOpenFile(file))
+            string fullpath = file.FullName;
+            if (_filesToIgnore.Contains(fullpath) || !EnsureCanOpenFile(file))
             {
                 return;
             }
 
-            _logger.LogInformation($"Pushing file for processing: {file.Name}...");
-            foreach (IObserver<FileInfo> observer in _observers)
+            if (_filesToIgnore.Add(fullpath))
             {
-                try
+                _logger.LogInformation($"Pushing file for processing: {file.Name}...");
+                foreach (IObserver<FileInfo> observer in _observers)
                 {
-                    observer.OnNext(file);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error when pushing {file} to {observer.GetType().Name}.");
+                    try
+                    {
+                        observer.OnNext(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error when pushing {file} to {observer.GetType().Name}.");
+                    }
                 }
             }
-
         }
 
         private bool EnsureCanOpenFile(FileInfo file)
@@ -115,23 +116,18 @@ namespace SyslogFilesToSql.Components.SyslogFiles
         private void OnFileRenamed(object sender, RenamedEventArgs e)
         {
             _logger.LogInformation($"Renamed: {e.OldName} -> {e.Name}");
-            CheckFile(new FileInfo(e.FullPath), checkFileGlobPattern: true);
+            CheckFile(new FileInfo(e.FullPath));
         }
 
         private void OnFileCreatedOrChanged(object sender, FileSystemEventArgs e)
         {
             _logger.LogInformation($"{e.ChangeType}: {e.Name}");
-            CheckFile(new FileInfo(e.FullPath), checkFileGlobPattern: true);
+            CheckFile(new FileInfo(e.FullPath));
         }
 
         public void Dispose()
         {
-            _fileWatcher.EnableRaisingEvents = false;
-            // TODO: listen only for expected event (renamed?)
-            _fileWatcher.Changed -= OnFileCreatedOrChanged;
-            _fileWatcher.Created -= OnFileCreatedOrChanged;
-            _fileWatcher.Renamed -= OnFileRenamed;
-            _fileWatcher.Error -= OnFileWatcherError;
+            _unsubscribeFromChanges?.Dispose();
             _fileWatcher.Dispose();
             _logger.LogInformation($"Stopped syslog files watcher.");
         }
