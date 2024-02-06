@@ -93,7 +93,7 @@ spec:
           path: /syslog
       containers:
       - name: syslog-files-to-sql
-        image: eric1901/syslog-files-to-sql:1.0.4
+        image: eric1901/syslog-files-to-sql:1.0.5
         volumeMounts:
         - name: secret-volume
           readOnly: true
