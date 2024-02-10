@@ -19,6 +19,7 @@
     <None Remove="Resources\001\Tables\syslog_severity.sql" />
     <None Remove="Resources\001\Views\v_syslog_msg.sql" />
     <None Remove="Resources\001\Views\v_syslog_msg_stat.sql" />
+    <None Remove="Resources\002\Procedures\complete_syslog_msg_import.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +40,7 @@
     <EmbeddedResource Include="Resources\001\Tables\syslog_msg_import.sql" />
     <EmbeddedResource Include="Resources\001\Views\v_syslog_msg_stat.sql" />
     <EmbeddedResource Include="Resources\001\Views\v_syslog_msg.sql" />
+    <EmbeddedResource Include="Resources\002\Procedures\complete_syslog_msg_import.sql" />
   </ItemGroup>
 
   <ItemGroup>

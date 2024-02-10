@@ -319,6 +319,7 @@ namespace SyslogFilesToSql.Components.SqlImport
                 using StreamReader syslogStream = file.OpenText();
                 IObservable<RawSyslogMessage> rawSyslogMessageProvider = Helpers.Helpers.GetRawSyslogMessageProvider(syslogStream);
 
+                int rowCount;
                 using (global::Npgsql.NpgsqlConnection cx = await _db.OpenConnection(cancellationToken))
                 {
                     using (global::Npgsql.NpgsqlBinaryImporter writer = await _db.InitializeSyslogImport(cx, cancellationToken))
@@ -330,7 +331,23 @@ namespace SyslogFilesToSql.Components.SqlImport
                         rawSyslogMessageProvider.Subscribe(syslogParserObserver);
                         try
                         {
-                            syslogParserObserver.Start(); 
+                            syslogParserObserver.Start();
+
+                            // Apparently there is a synchronization issue between SyslogStreamParser.Start(), IsIdle and OnCompleted(). State probably is not fully reliable, we workaround this.
+                            // Else, OnCompleted() may return before actually starting.
+                            using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(250)))
+                            {
+                                try
+                                {
+                                    while (syslogParserObserver.IsIdle)
+                                    {
+                                        await Task.Delay(10, cts.Token).ConfigureAwait(false);
+                                    }
+                                }
+                                catch (TaskCanceledException)
+                                { }
+                            }
+
                             syslogParserObserver.OnCompleted();
                         }
                         finally
@@ -338,13 +355,21 @@ namespace SyslogFilesToSql.Components.SqlImport
                             syslogParserObserver.Unsubscribe(sqlCopyObserver);
                             syslogParserObserver.Stop();
                         }
+                        rowCount = sqlCopyObserver.RowCount;
                         await writer.CompleteAsync(cancellationToken);
                     }
                     await _db.AddFileImported(cx, file.FullName, fileHash, cancellationToken);
                 }
                 
                 _filesProcessed.Add(file.FullName);
-                _logger.LogDebug($"File {file.Name} copied to intermediate table.");
+                if (rowCount != 0)
+                {
+                    _logger.LogDebug($"File {file.Name} ({rowCount} rows) copied to intermediate table.");
+                }
+                else
+                {
+                    _logger.LogWarning($"File {file.Name} could not be processed: 0 line parsed but size is {file.Length} bytes.");
+                }
                 _totalProcessedFileCount++;
                 return ProcessResult.Success;
             }

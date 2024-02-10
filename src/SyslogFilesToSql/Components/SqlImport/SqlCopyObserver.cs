@@ -14,9 +14,10 @@ namespace SyslogFilesToSql.Components.SqlImport
         private bool _isInErrorState;
         private DateTimeOffset _previousRowDate;
 
+        public int RowCount { get; private set; }
+
         public void OnCompleted()
         {
-
         }
 
         public void OnError(Exception error)
@@ -71,6 +72,7 @@ namespace SyslogFilesToSql.Components.SqlImport
                                          msgId,
                                          value.Message,
                                          value.PayloadType.ToString()));
+            RowCount++;
         }
 
         /// <summary>
