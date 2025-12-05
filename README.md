@@ -1,3 +1,9 @@
+# This repository has been moved
+
+New location of thi srepository is: https://codeberg.org/eric-b/syslog-files-to-sql
+
+Following content is not kept up to date.
+
 # SyslogFilesToSql
 
 ## Why SyslogFilesToSql ?
